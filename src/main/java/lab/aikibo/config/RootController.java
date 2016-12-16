@@ -3,6 +3,7 @@ package lab.aikibo.config;
 import lab.aikibo.constant.StatusRespond;
 import lab.aikibo.model.PembayaranSppt;
 import lab.aikibo.model.StatusInq;
+import lab.aikibo.services.PembayaranServices;
 import lab.aikibo.services.SpptServices;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
