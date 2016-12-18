@@ -79,8 +79,6 @@ public class StoreProceduresDaoImpl implements StoreProceduresDao {
             RootController.getLogger().debug(" >>> INQ ERROR >>> " + status);
             return status;
         }
-
-        return status;
     }
 
     @Override
@@ -143,6 +141,46 @@ public class StoreProceduresDaoImpl implements StoreProceduresDao {
 
     @Override
     public StatusRev reversalPembayaran(String nop, String thn, String ntpd, String ipClient) {
-        return null;
+        callable = null;
+        revPembayaran = null;
+        statusRev = null;
+
+        try {
+            callable = boneCPDs.getConnection().prepareCall("call reversal_pembayaran(?,?,?,?,?)");
+            callable.registerOutParameter(1, OracleTypes.CURSOR);
+            callable.setString(2, nop);
+            callable.setString(3, thn);
+            callable.setString(4, ntpd);
+            callable.setString(5, ipClient);
+            callable.executeUpdate();
+
+            ResultSet rs = (ResultSet) callable.getObject(1);
+            ResultSetMetaData rsMeta = rs.getMetaData();
+            ReversalPembayaran revBayar = new ReversalPembayaran();
+            while(rs.next()) {
+                if(!rsMeta.getColumnName(1).equals("KODE_ERROR")) {
+                    revBayar.setNop(rs.getString("NOP"));
+                    revBayar.setThn(rs.getString("THN"));
+                    revBayar.setNtpd(rs.getString("NTPD"));
+                    statusRev = new StatusRev(StatusRespond.APPROVED, "Proses Reversal Berhasil", revBayar);
+                } else {
+                    String infoSp = rs.getString("KODE_ERROR");
+                    if(infoSp.equals("01")) {
+                        statusRev = new StatusRev(StatusRespond.DATA_INQ_NIHIL, "Data Yang Diminta Tidak Ada",
+                                null);
+                    } else if(infoSp.equals("02")) {
+                        statusRev = new StatusRev(StatusRespond.DATABASE_ERROR, "Data Tersebut Ganda",
+                                null);
+                    }
+                    RootController.getLogger().debug(" >>> REVERSAL ERROR >>> " + statusRev);
+                    return statusRev;
+                }
+            }
+        } catch(Exception e) {
+            statusRev = new StatusRev(StatusRespond.DATABASE_ERROR, "Kesalahan Server", null);
+            RootController.getLogger().debug(" >>> REV ERROR >>> " + statusRev);
+            return statusRev;
+        }
+        return statusRev;
     }
 }
