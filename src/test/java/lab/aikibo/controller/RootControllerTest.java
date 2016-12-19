@@ -1,10 +1,7 @@
 package lab.aikibo.controller;
 
 import lab.aikibo.constant.StatusRespond;
-import lab.aikibo.model.PembayaranSppt;
-import lab.aikibo.model.Sppt;
-import lab.aikibo.model.StatusInq;
-import lab.aikibo.model.StatusTrx;
+import lab.aikibo.model.*;
 import lab.aikibo.services.PembayaranServices;
 import lab.aikibo.services.SpptServices;
 import org.joda.time.DateTime;
@@ -39,6 +36,8 @@ public class RootControllerTest {
     private SpptServices spptServices;
     @Mock
     private PembayaranServices byrServices;
+    @Mock
+    private ReversalPembayaran revServices;
 
     private StatusInq status;
     private StatusInq statusInqGagalDataTidakAda;
@@ -49,7 +48,13 @@ public class RootControllerTest {
     private StatusTrx statusTrxTerbayar;
     private StatusTrx statusTrxBatal;
     private StatusTrx statusTrxError;
+    private StatusTrx statusTrxhnPajakBukanAngka;
+    private StatusTrx statusTrxWaktuBayarLdWaktuCatat;
     private PembayaranSppt byrSppt;
+
+    private StatusRev statusRevBerhasil;
+    private StatusRev statusRevNihil;
+    private StatusRev statusRevGanda;
 
     @Before
     public void init() {
@@ -85,61 +90,122 @@ public class RootControllerTest {
                 rootController.getSppt("332901000100100010","2013", mock).getSppt().getNop());
         assertEquals("2013",
                 rootController.getSppt("332901000100100010","2013", mock).getSppt().getThn());
-    }
-
-    @Test
-    public void testInquirySppt() {
-        when(spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1"))
-           .thenReturn(status);
-
-        assertEquals(1, spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getCode());
-        assertEquals("Data Ditemukan",
-                spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getMessage());
-        assertEquals("332901000100100010",
-                spptServices.getSpptByNopThn("332901000100100010","2013", "192.168.1.1").getSppt().getNop());
-        assertEquals("2013",
-                spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getSppt().getThn());
         assertEquals("FULAN",
-                spptServices.getSpptByNopThn("332901000100100010", "2013","192.168.1.1").getSppt().getNama());
+                rootController.getSppt("332901000100100010","2013", mock).getSppt().getNama());
         assertEquals("BREBES",
-                spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getSppt().getAlamatOp());
+                rootController.getSppt("332901000100100010","2013", mock).getSppt().getAlamatOp());
         assertEquals(new BigInteger("10000"),
-                spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getSppt().getPokok());
+                rootController.getSppt("332901000100100010", "2013", mock).getSppt().getPokok());
         assertEquals(new BigInteger("0"),
-                spptServices.getSpptByNopThn("332901000100100010","2013","192.168.1.1").getSppt().getDenda());
+                rootController.getSppt("332901000100100010", "2013", mock).getSppt().getDenda());
     }
 
     @Test
     public void testInquirySpptGagalKarnaNihil() {
-        when(spptServices.getSpptByNopThn("332901000100100020","2013","192.168.1.1"))
+        when(spptServices.getSpptByNopThn("332901000100100020","2013",null))
                 .thenReturn(statusInqGagalDataTidakAda);
 
         assertEquals(10,
-                spptServices.getSpptByNopThn("332901000100100020","2013", "192.168.1.1").getCode());
+                rootController.getSppt("332901000100100020","2013", mock).getCode());
         assertEquals("Data Tidak Ditemukan",
-                spptServices.getSpptByNopThn("332901000100100020","2013","192.168.1.1").getMessage());
-        assertNull(spptServices.getSpptByNopThn("332901000100100020","2013","192.168.1.1").getSppt());
+                rootController.getSppt("332901000100100020","2013", mock).getMessage());
+        assertNull(rootController.getSppt("332901000100100020","2013", mock).getSppt());
     }
 
     @Test
     public void testInquiryDbError() {
-        when(spptServices.getSpptByNopThn("332901000100100030","2013","192.168.1.1"))
+        when(spptServices.getSpptByNopThn("332901000100100030","2013",null))
                 .thenReturn(statusInqError);
 
         assertEquals(4,
-                spptServices.getSpptByNopThn("332901000100100030","2013","192.168.1.1").getCode());
+                rootController.getSppt("332901000100100030","2013", mock).getCode());
         assertEquals("Kesalahan DB",
-                spptServices.getSpptByNopThn("332901000100100030","2013","192.168.1.1").getMessage());
-        assertNull(spptServices.getSpptByNopThn("332901000100100030","2013","192.168.1.1").getSppt());
+                rootController.getSppt("332901000100100030","2013", mock).getMessage());
+        assertNull(rootController.getSppt("332901000100100030","2013", mock).getSppt());
+    }
+
+    /**
+     * @TODO: melakukan unit testing untuk skenario inquiry dengan tahun pajak ada karakter bukan angka.
+     */
+    @Test
+    public void testInquiryThnPajakBukanAngka() {
+
+    }
+
+    @Test
+    public void testInquiryTrxWaktuBayarLdWaktuCatat() {
+
     }
 
     @Test
     public void testPembayaranSpptSukses() {
         when(byrServices.prosesPembayaran("332901000100100010","2013",
-                new DateTime(2016, 12, 19, 10, 0),"192.168.1.1"))
+                new DateTime(2016, 12, 19, 10, 0),null))
                 .thenReturn(statusTrxBerhasil);
 
+        assertEquals(1,
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getCode());
+        assertEquals("Pembayaran Telah Tercatat",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getMessage());
+        assertEquals("332901000100100010",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getNop());
+        assertEquals("2013",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getThn());
+        assertEquals("KODE_NTPD",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getNtpd());
+        assertEquals("4.1.1.12.1",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getMataAnggaranPokok());
+        assertEquals(new BigInteger("10000"),
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getPokok());
+        assertEquals("4.1.1.12.2",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getMataAnggaranSanksi());
+        assertEquals(new BigInteger("0"),
+                rootController.prosesPembayaran("332901000100100010", "2013","19122016",
+                        "1000", mock).getByrSppt().getSanksi());
+        assertEquals("FULAN",
+                rootController.prosesPembayaran("332901000100100010", "2013", "19122016",
+                        "1000", mock).getByrSppt().getNamaWp());
+        assertEquals("BREBES",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getByrSppt().getAlamatOp());
+    }
+
+
+
+    /**
+     * @TODO: melakukan unit testing untuk skenario tagihan nihil
+     */
+    @Test
+    public void testPembayaranNihil() {
 
     }
+
+    /**
+     * @TODO: melakukan unit testing untuk skenario pembayaran yang telah terbayarkan.
+     */
+    @Test
+    public void testPembayaranTerbayar() {
+
+    }
+
+    /**
+     * @TODO: melakukan unit testing untuk skenario tagihan yang telah dibatalkan
+     */
+    @Test
+    public void testPembayaranBatal() {
+
+    }
+
+    /**
+     * @TODO: melakukan unit testing untuk skenario db connection error
+     */
 
 }
