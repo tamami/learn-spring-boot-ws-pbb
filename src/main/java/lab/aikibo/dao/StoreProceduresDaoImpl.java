@@ -6,6 +6,7 @@ import lab.aikibo.controller.RootController;
 import lab.aikibo.model.*;
 import oracle.jdbc.OracleTypes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.sql.CallableStatement;
@@ -16,6 +17,7 @@ import java.util.Date;
 /**
  * Created by tamami on 18/12/16.
  */
+@Repository("storeProceduresDao")
 public class StoreProceduresDaoImpl implements StoreProceduresDao {
 
     @Autowired

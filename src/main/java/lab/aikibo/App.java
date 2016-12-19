@@ -15,11 +15,8 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguratio
  */
 @Configuration
 @ComponentScan
-@EnableJpaRepositories
-@Import(RepositoryRestMvcConfiguration.class)
 @EnableAutoConfiguration
 @Import({HibernateConfiguration.class})
-)
 public class App 
 {
     public static void main( String[] args ) {

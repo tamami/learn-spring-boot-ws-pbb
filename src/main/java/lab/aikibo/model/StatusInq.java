@@ -10,7 +10,7 @@ public class StatusInq extends Status {
 
     private Sppt sppt;
 
-    public StatusInq();
+    public StatusInq() {};
 
     public StatusInq(int code, String message, Sppt sppt) {
         super(code, message);

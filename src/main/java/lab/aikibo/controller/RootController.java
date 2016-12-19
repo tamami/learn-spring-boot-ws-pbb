@@ -25,8 +25,6 @@ import java.math.BigInteger;
 @RestController
 public class RootController {
 
-    static final Logger logger = Logger.getLogger(RootController.class);
-
     @Autowired
     SpptServices spptServices;
 
