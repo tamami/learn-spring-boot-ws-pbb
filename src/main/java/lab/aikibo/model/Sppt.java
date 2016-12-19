@@ -21,4 +21,15 @@ public class Sppt implements Serializable {
     private BigInteger pokok;
     private BigInteger denda;
 
+    public Sppt() {}
+
+    public Sppt(String nop, String thn, String nama, String alamatOp, BigInteger pokok, BigInteger denda) {
+        this.nop = nop;
+        this.thn = thn;
+        this.nama = nama;
+        this.alamatOp = alamatOp;
+        this.pokok = pokok;
+        this.denda = denda;
+    }
+
 }

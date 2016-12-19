@@ -106,7 +106,7 @@ public class StoreProceduresDaoImpl implements StoreProceduresDao {
                     RootController.getLogger().debug(" >>> DATA PEMBAYARAN ADA: " + rs.getString("nop"));
                     pembayaranSppt.setNop(rs.getString("NOP"));
                     pembayaranSppt.setThn(rs.getString("THN"));
-                    pembayaranSppt.setNtdp(rs.getString("NTPD"));
+                    pembayaranSppt.setNtpd(rs.getString("NTPD"));
                     pembayaranSppt.setMataAnggaranPokok(rs.getString("MATA_ANGGARAN_POKOK"));
                     pembayaranSppt.setPokok(rs.getBigDecimal("POKOK").toBigInteger());
                     pembayaranSppt.setMataAnggaranSanksi(rs.getString("MATA_ANGGARAN_SANKSI"));

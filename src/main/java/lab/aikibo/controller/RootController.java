@@ -50,7 +50,9 @@ public class RootController {
         try {
             Integer.parseInt(thnPajak);
         } catch(NumberFormatException ex) {
-            status = new StatusInq(StatusRespond.THN_PAJAK_BUKAN_ANGKA, "Tahun Pajak Mengandung Karakter Bukan Angka", null);
+            status = new StatusInq(StatusRespond.THN_PAJAK_BUKAN_ANGKA,
+                    "Tahun Pajak Mengandung Karakter Bukan Angka", null);
+            logger.debug(" >>> KESALAHAN CLIENT >>> " + status);
             return status;
         }
 
