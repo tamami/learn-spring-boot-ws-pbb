@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.math.BigInteger;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -33,8 +32,6 @@ public class StoreProceduresDaoImplTest {
     private StatusTrx statusTrxTerbayar;
     private StatusTrx statusTrxBatal;
     private StatusTrx statusTrxError;
-    private StatusTrx statusTrxhnPajakBukanAngka;
-    private StatusTrx statusTrxWaktuBayarLdWaktuCatat;
     private PembayaranSppt byrSppt;
 
     private StatusRev statusRevBerhasil;
@@ -165,47 +162,90 @@ public class StoreProceduresDaoImplTest {
                         new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt().getAlamatOp());
     }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi dengan tagihan nihil
-     */
     @Test
-    public void testTrxNihil() {}
+    public void testTrxNihil() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxNihil);
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi dengan tagihan telah terbayar
-     */
-    @Test
-    public void testTrxTerbayar() {}
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi dengan tagihan telah dibatalkan
-     */
     @Test
-    public void testTrxBatal() {}
+    public void testTrxTerbayar() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxTerbayar);
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi dengan kesalahan server
-     */
-    @Test
-    public void testTrxError() {}
+        assertEquals(StatusRespond.TAGIHAN_TELAH_TERBAYAR,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Tagihan Telah Terbayar",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi gagal karena tahun pajak bukan angka
-     */
     @Test
-    public void testTrxThnPajakBukanAngka() {}
+    public void testTrxBatal() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxBatal);
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario transaksi gagal karna waktu bayar lebih dari waktu catat
-     */
-    @Test
-    public void testTrxWaktuInvalid() {}
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,00).toDate(),null).getCode());
+        assertEquals("Tagihan Telah Dibatalkan",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario reversal yang berhasil
-     */
     @Test
-    public void testRevSukses() {}
+    public void testTrxError() {
+        when(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null))
+                .thenReturn(statusTrxError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getCode());
+        assertEquals("Kesalahan Server",
+                spDao.prosesPembayaran("332901000100100010","2013",
+                        new DateTime(2016,12,19,10,0).toDate(), null).getMessage());
+        assertNull(spDao.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0).toDate(), null).getByrSppt());
+    }
+
+    @Test
+    public void testRevSukses() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null).getCode());
+        assertEquals("Reversal Telah Berhasil Dilakukan",
+                spDao.reversalPembayaran("332901000100100010", "2013", "KODE_NTPD", null).getMessage());
+        assertEquals("332901000100100010",
+                spDao.reversalPembayaran("332901000100100010","2013", "KODE_NTPD", null)
+            .getRevPembayaran().getNop());
+        assertEquals("2013",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getRevPembayaran().getThn());
+        assertEquals("KODE_NTPD",
+                spDao.reversalPembayaran("332901000100100010","2013", "KODE_NTPD", null)
+                        .getRevPembayaran().getNtpd());
+
+    }
 
     /**
      * @TODO: unit test StoreProceduresDaoImpl untuk skenario reversal gagal karna nihil
