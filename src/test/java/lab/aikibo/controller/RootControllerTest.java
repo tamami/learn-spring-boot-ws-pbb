@@ -3,6 +3,7 @@ package lab.aikibo.controller;
 import lab.aikibo.constant.StatusRespond;
 import lab.aikibo.model.*;
 import lab.aikibo.services.PembayaranServices;
+import lab.aikibo.services.ReversalServices;
 import lab.aikibo.services.SpptServices;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -14,7 +15,6 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
@@ -37,7 +37,7 @@ public class RootControllerTest {
     @Mock
     private PembayaranServices byrServices;
     @Mock
-    private ReversalPembayaran revServices;
+    private ReversalServices revServices;
 
     private StatusInq status;
     private StatusInq statusInqGagalDataTidakAda;
@@ -55,6 +55,8 @@ public class RootControllerTest {
     private StatusRev statusRevBerhasil;
     private StatusRev statusRevNihil;
     private StatusRev statusRevGanda;
+    private StatusRev statusRevError;
+    private ReversalPembayaran revSppt;
 
     @Before
     public void init() {
@@ -76,6 +78,12 @@ public class RootControllerTest {
                 "Tagihan SPPT Telah Dibatalkan", null);
         statusTrxError = new StatusTrx(StatusRespond.DATABASE_ERROR,
                 "Kesalahan Server", null);
+
+        revSppt = new ReversalPembayaran("332901000100100010","2013","KODE_NTPD");
+        statusRevBerhasil = new StatusRev(StatusRespond.APPROVED, "Proses Reversal Berhasil", revSppt);
+        statusRevNihil = new StatusRev(StatusRespond.DATA_INQ_NIHIL, "Data Yang Diminta Tidak Ada", null);
+        statusRevGanda = new StatusRev(StatusRespond.DATABASE_ERROR, "Data Tersebut Ganda", null);
+        statusRevError = new StatusRev(StatusRespond.DATABASE_ERROR, "Kesalahan Server", null);
     }
 
     @Test
@@ -124,21 +132,29 @@ public class RootControllerTest {
         assertNull(rootController.getSppt("332901000100100030","2013", mock).getSppt());
     }
 
-    /**
-     * @TODO: melakukan unit testing untuk skenario inquiry dengan tahun pajak ada karakter bukan angka.
-     */
     @Test
     public void testInquiryThnPajakBukanAngka() {
-
+        assertEquals(36,
+                rootController.getSppt("332901000100100010","2a13", mock).getCode());
+        assertEquals("Tahun Pajak Mengandung Karakter Bukan Angka",
+                rootController.getSppt("332901000100100010","2a13", mock).getMessage());
+        assertNull(rootController.getSppt("332901000100100010","2a13", mock).getSppt());
     }
 
     @Test
-    public void testInquiryTrxWaktuBayarLdWaktuCatat() {
-
+    public void testTrxWaktuBayarLdWaktuCatat() {
+        assertEquals(32,
+                rootController.prosesPembayaran("332901000100100010","2013","21122016",
+                        "1000", mock).getCode());
+        assertEquals("Tanggal atau jam pada saat dibayarkan melebihi tanggal dan jam saat ini",
+                rootController.prosesPembayaran("332901000100100010","2013","21122016",
+                        "1000", mock).getMessage());
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","21122016",
+                "1000", mock).getByrSppt());
     }
 
     @Test
-    public void testPembayaranSpptSukses() {
+    public void testTrxSpptSukses() {
         when(byrServices.prosesPembayaran("332901000100100010","2013",
                 new DateTime(2016, 12, 19, 10, 0),null))
                 .thenReturn(statusTrxBerhasil);
@@ -180,32 +196,124 @@ public class RootControllerTest {
 
 
 
-    /**
-     * @TODO: melakukan unit testing untuk skenario tagihan nihil
-     */
     @Test
-    public void testPembayaranNihil() {
+    public void testTrxNihil() {
+        when(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016, 12, 19, 10, 0),null))
+                .thenReturn(statusTrxNihil);
 
+        assertEquals(StatusRespond.TAGIHAN_TELAH_TERBAYAR,
+                rootController.prosesPembayaran("332901000100100010","2013",
+                        "19122016","1000", mock).getCode());
+        assertEquals("Tagihan Telah Terbayar atau Pokok Pajak Nihil",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getMessage());
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                "1000", mock).getByrSppt());
     }
 
-    /**
-     * @TODO: melakukan unit testing untuk skenario pembayaran yang telah terbayarkan.
-     */
     @Test
-    public void testPembayaranTerbayar() {
+    public void testTrxTerbayar() {
+        when(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0), null)).thenReturn(statusTrxTerbayar);
 
+        assertEquals(StatusRespond.TAGIHAN_TELAH_TERBAYAR,
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getCode());
+        assertEquals("Tagihan Telah Terbayar",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getMessage());
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                "1000", mock).getByrSppt());
     }
 
-    /**
-     * @TODO: melakukan unit testing untuk skenario tagihan yang telah dibatalkan
-     */
     @Test
-    public void testPembayaranBatal() {
+    public void testTrxBatal() {
+        when(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0), null)).thenReturn(statusTrxBatal);
 
+        assertEquals(StatusRespond.JUMLAH_SETORAN_NIHIL,
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getCode());
+        assertEquals("Tagihan SPPT Telah Dibatalkan",
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getMessage());
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                "1000", mock).getByrSppt());
     }
 
-    /**
-     * @TODO: melakukan unit testing untuk skenario db connection error
-     */
+    @Test
+    public void testTrxError() {
+        when(byrServices.prosesPembayaran("332901000100100010","2013",
+                new DateTime(2016,12,19,10,0), null)).thenReturn(statusTrxError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                        "1000", mock).getCode());
+        assertEquals("Kesalahan Server",
+                rootController.prosesPembayaran("332901000100100010", "2013","19122016",
+                        "1000", mock).getMessage());
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","19122016",
+                "1000", mock).getByrSppt());
+    }
+
+    @Test
+    public void testRevSukses() {
+        when(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevBerhasil);
+
+        assertEquals(StatusRespond.APPROVED,
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getCode());
+        assertEquals("Proses Reversal Berhasil",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getMessage());
+        assertEquals("332901000100100010",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock)
+                        .getRevPembayaran().getNop());
+        assertEquals("2013",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock)
+                        .getRevPembayaran().getThn());
+        assertEquals("KODE_NTPD",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock)
+                        .getRevPembayaran().getNtpd());
+    }
+
+    @Test
+    public void testRevNihil() {
+        when(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevNihil);
+
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getMessage());
+        assertNull(rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).
+                getRevPembayaran());
+    }
+
+    @Test
+    public void testRevGanda() {
+        when(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevGanda);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getCode());
+        assertEquals("Data Tersebut Ganda",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getMessage());
+        assertNull(rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevError() {
+        when(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getCode());
+        assertEquals("Kesalahan Server",
+                rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock).getMessage());
+        assertNull(rootController.prosesReversal("332901000100100010","2013","KODE_NTPD", mock)
+                .getRevPembayaran());
+    }
 
 }
