@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,9 +45,6 @@ public class ReversalServicesImplTest {
                 null);
     }
 
-    /**
-     * @TODO: buat unit test untuk skenario reversal yang berhasil
-     */
     @Test
     public void testRevBerhasil() {
         when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
@@ -62,21 +60,45 @@ public class ReversalServicesImplTest {
         assertEquals("2013",
                 revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
                         .getRevPembayaran().getThn());
+        assertEquals("KODE_NTPD",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran().getNtpd());
     }
 
-    /**
-     * @TODO: buat unit test untuk skenario reversal gagal karna data nihil
-     */
-    public void testRevNihil() {}
+    @Test
+    public void testRevNihil() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevNihil);
 
-    /**
-     * @TODO: buat unit test untuk skenario reversal gagal karna data ganda
-     */
-    public void testRevGanda(){}
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevGanda(){
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevGanda);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Data Transaksi Tercatat Ganda",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran());
+    }
 
     /**
      * @TODO: buat unit test untuk skenario reversal gagal karena kesalahan DB
      */
+    @Test
     public void testRevError() {}
 
 }
