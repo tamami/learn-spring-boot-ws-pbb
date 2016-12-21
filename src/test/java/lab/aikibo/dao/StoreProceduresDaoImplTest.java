@@ -247,22 +247,49 @@ public class StoreProceduresDaoImplTest {
 
     }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario reversal gagal karna nihil
-     */
     @Test
-    public void testRevNihil() {}
+    public void testRevNihil() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevNihil);
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario reversal gagal karna data ganda
-     */
-    @Test
-    public void testRevDouble() {}
+        assertEquals(StatusRespond.DATA_INQ_NIHIL,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Data Yang Diminta Tidak Ada",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                .getRevPembayaran());
+    }
 
-    /**
-     * @TODO: unit test StoreProceduresDaoImpl untuk skenario reversal gagal karna server error
-     */
     @Test
-    public void testRevError() {}
+    public void testRevDouble() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevGanda);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Data Transaksi Tercatat Ganda",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                .getRevPembayaran());
+    }
+
+    @Test
+    public void testRevError() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null))
+                .thenReturn(statusRevError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD", null)
+                        .getCode());
+        assertEquals("Kesalahan Server",
+                spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null)
+                        .getMessage());
+        assertNull(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null)
+                .getRevPembayaran());
+    }
 
 }

@@ -43,6 +43,7 @@ public class RootControllerTest {
     private StatusInq statusInqGagalDataTidakAda;
     private StatusInq statusInqError;
     private Sppt sppt;
+
     private StatusTrx statusTrxBerhasil;
     private StatusTrx statusTrxNihil;
     private StatusTrx statusTrxTerbayar;
@@ -143,13 +144,13 @@ public class RootControllerTest {
 
     @Test
     public void testTrxWaktuBayarLdWaktuCatat() {
-        assertEquals(32,
-                rootController.prosesPembayaran("332901000100100010","2013","21122016",
+        assertEquals(StatusRespond.TGL_JAM_BAYAR_LD_TGL_JAM_KIRIM,
+                rootController.prosesPembayaran("332901000100100010","2013","22122017",
                         "1000", mock).getCode());
         assertEquals("Tanggal atau jam pada saat dibayarkan melebihi tanggal dan jam saat ini",
-                rootController.prosesPembayaran("332901000100100010","2013","21122016",
+                rootController.prosesPembayaran("332901000100100010","2013","22122017",
                         "1000", mock).getMessage());
-        assertNull(rootController.prosesPembayaran("332901000100100010","2013","21122016",
+        assertNull(rootController.prosesPembayaran("332901000100100010","2013","22122017",
                 "1000", mock).getByrSppt());
     }
 
