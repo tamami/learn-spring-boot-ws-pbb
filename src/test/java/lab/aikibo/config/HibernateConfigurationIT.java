@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=App.class)
-public class HibernateConfigurationTest {
+public class HibernateConfigurationIT {
 
     @Autowired
     private BoneCPDataSource boneDS;
