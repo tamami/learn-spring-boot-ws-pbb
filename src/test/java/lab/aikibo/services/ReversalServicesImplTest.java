@@ -99,6 +99,18 @@ public class ReversalServicesImplTest {
      * @TODO: buat unit test untuk skenario reversal gagal karena kesalahan DB
      */
     @Test
-    public void testRevError() {}
+    public void testRevError() {
+        when(spDao.reversalPembayaran("332901000100100010","2013","KODE_NTPD",null))
+                .thenReturn(statusRevError);
+
+        assertEquals(StatusRespond.DATABASE_ERROR,
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getCode());
+        assertEquals("Kesalahan Server",
+                revServices.prosesReversal("332901000100100010","2013","KODE_NTPD", null)
+                        .getMessage());
+        assertNull(revServices.prosesReversal("332901000100100010","2013","KODE_NTPD",null)
+                        .getRevPembayaran());
+    }
 
 }
