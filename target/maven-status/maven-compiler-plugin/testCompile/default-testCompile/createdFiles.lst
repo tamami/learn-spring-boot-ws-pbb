@@ -1,1 +1,8 @@
+lab/aikibo/dao/StoreProceduresDaoImplTest.class
+lab/aikibo/config/HibernateConfigurationIT.class
+lab/aikibo/services/ServicesIT.class
+lab/aikibo/services/SpptServicesImplTest.class
+lab/aikibo/controller/RootControllerTest.class
 lab/aikibo/AppTest.class
+lab/aikibo/services/ReversalServicesImplTest.class
+lab/aikibo/services/PembayaranServicesImplTest.class

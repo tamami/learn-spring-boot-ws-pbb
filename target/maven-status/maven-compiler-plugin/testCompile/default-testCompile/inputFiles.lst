@@ -1,1 +1,8 @@
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/services/SpptServicesImplTest.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/services/ReversalServicesImplTest.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/services/PembayaranServicesImplTest.java
 /home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/AppTest.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/controller/RootControllerTest.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/config/HibernateConfigurationIT.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/services/ServicesIT.java
+/home/tamami/belajar/learn-spring-boot-ws-pbb/src/test/java/lab/aikibo/dao/StoreProceduresDaoImplTest.java

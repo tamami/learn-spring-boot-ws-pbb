@@ -42,7 +42,7 @@ public class RootController {
                              HttpServletRequest request) {
         logger.debug("NOP: " + nop + "; THN: " + thnPajak);
         String ipClient = request.getHeader("X-FORWARDED-FOR");
-        if(ipClient == null) {
+        if(ipClient == null && request != null) {
             ipClient = request.getRemoteAddr();
         }
         StatusInq status = null;
