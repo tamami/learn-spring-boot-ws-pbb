@@ -49,8 +49,6 @@ public class RootControllerTest {
     private StatusTrx statusTrxTerbayar;
     private StatusTrx statusTrxBatal;
     private StatusTrx statusTrxError;
-    private StatusTrx statusTrxhnPajakBukanAngka;
-    private StatusTrx statusTrxWaktuBayarLdWaktuCatat;
     private PembayaranSppt byrSppt;
 
     private StatusRev statusRevBerhasil;

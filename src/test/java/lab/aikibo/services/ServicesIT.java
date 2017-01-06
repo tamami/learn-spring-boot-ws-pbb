@@ -65,13 +65,13 @@ public class ServicesIT {
     @Test
     public void testRev() {
         StatusRev statusRev = revServices.prosesReversal("332901000100100010","2013",
-                "2016AA74516SB20050812", null);
+                "2016AA74553SB20051412", null);
 
         assertEquals(StatusRespond.APPROVED, statusRev.getCode());
         assertEquals("Proses Reversal Berhasil", statusRev.getMessage());
         assertEquals("332901000100100010",statusRev.getRevPembayaran().getNop());
         assertEquals("2013", statusRev.getRevPembayaran().getThn());
-        assertEquals("2016AA74516SB20050812", statusRev.getRevPembayaran().getNtpd());
+        assertEquals("2016AA74553SB20051412", statusRev.getRevPembayaran().getNtpd());
     }
 
 }
